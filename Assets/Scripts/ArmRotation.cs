@@ -48,7 +48,7 @@ public class ArmRotation : MonoBehaviour {
              difference = Player.EnemyAimLocation.position - transform.position;
            // difference.Normalize();
             float rotZ = Mathf.Atan2(difference.y, difference.x) * Mathf.Rad2Deg;
-            Quaternion rotation = Quaternion.AngleAxis(rotZ, Vector3.forward);
+            Quaternion rotation = Quaternion.AngleAxis(rotZ + 10, Vector3.forward);
             // transform.rotation = Quaternion.Slerp(transform.rotation, rotation, speed * Time.deltaTime + rotationOffset);
             transform.rotation = Quaternion.Euler(0f, 0f, rotZ + rotationOffset);
         }

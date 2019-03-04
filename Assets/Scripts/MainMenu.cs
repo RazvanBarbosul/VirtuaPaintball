@@ -42,6 +42,8 @@ public class MainMenu : MonoBehaviour {
     {
         CommingSoon.gameObject.SetActive(true);
         StartCoroutine(ShowStartingSoon());
+        DifficultyManager.SurvivalDifficulty = 1;
+        SceneManager.LoadScene("TeamFight");
     }
 
     IEnumerator ShowStartingSoon()

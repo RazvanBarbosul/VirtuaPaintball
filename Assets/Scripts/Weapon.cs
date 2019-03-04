@@ -77,11 +77,11 @@ public class Weapon : MonoBehaviour {
         // rb.AddForce(project.transform.right * 45, ForceMode.VelocityChange);
         if (Enemy.Direction)
         {
-            rb.velocity = project.transform.right * 30;
+            rb.velocity = project.transform.right * 40;
         }
         else
         {
-            rb.velocity = project.transform.right * -30;
+            rb.velocity = project.transform.right * -40;
         }
 
         //add sound

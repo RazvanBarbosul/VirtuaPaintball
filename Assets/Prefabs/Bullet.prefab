@@ -40,7 +40,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1822704163920290}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 33.203503, y: -8.241, z: 4.9938245}
+  m_LocalPosition: {x: -41.830925, y: -11.441282, z: 0}
   m_LocalScale: {x: 0.3, y: 0.3, z: 1.88}
   m_Children: []
   m_Father: {fileID: 0}
@@ -119,7 +119,7 @@ CircleCollider2D:
   m_UsedByComposite: 0
   m_Offset: {x: 0, y: 0}
   serializedVersion: 2
-  m_Radius: 0.49999997
+  m_Radius: 0.51
 --- !u!58 &58952810426797632
 CircleCollider2D:
   m_ObjectHideFlags: 1
@@ -158,7 +158,7 @@ BoxCollider2D:
     adaptiveTiling: 0
   m_AutoTiling: 0
   serializedVersion: 2
-  m_Size: {x: 0.99999994, y: 0.99999994}
+  m_Size: {x: 1.06, y: 1.07}
   m_EdgeRadius: 0
 --- !u!114 &114176699258857874
 MonoBehaviour:
@@ -173,3 +173,5 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bullet: {fileID: 1822704163920290}
   player: {fileID: 114990244268368904, guid: b77dc5b2b19323144acb37e8a1e6eb77, type: 2}
+  areaOfEffect: 0.16
+  damage: 50

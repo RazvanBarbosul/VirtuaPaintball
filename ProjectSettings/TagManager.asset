@@ -13,6 +13,7 @@ TagManager:
   - Wall
   - Ceiling
   - EnemyBullet
+  - Terrain
   layers:
   - Default
   - TransparentFX
