@@ -39,7 +39,7 @@ public class Enemy : MonoBehaviour {
         else
         {
             Direction = false;
-            Controller.Flip();
+            Controller.CmdFlip();
         }
         EnemyStartHealth = 100;
         EnemyCurrentHealth = EnemyStartHealth;
@@ -162,14 +162,14 @@ public class Enemy : MonoBehaviour {
         if (Player.transform.position.x > gameObject.transform.position.x && !Direction && Player!= null)
         {
             // ... flip the player.
-            Controller.Flip();
+            Controller.CmdFlip();
             Direction = !Direction;
         }
         // Otherwise if the input is moving the player left and the player is facing right...
         else if (Player.transform.position.x < gameObject.transform.position.x && Direction && Player !=null)
         {
             // ... flip the player.
-            Controller.Flip();
+            Controller.CmdFlip();
             Direction = !Direction;
         }
 

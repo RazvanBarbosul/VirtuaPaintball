@@ -15,6 +15,7 @@ public class Tiling : MonoBehaviour {
     public Transform myTransform;
     public Transform parents;
 
+
     private void Awake()
     {
         cam = Camera.main;
@@ -49,6 +50,10 @@ public class Tiling : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        if (!cam)
+        {
+            cam = Camera.main;
+        }
 		if (hasLeftBuddy == false || hasRightBuddy == false)
         {
             float camHorizontalExtend = cam.orthographicSize * Screen.width / Screen.height;

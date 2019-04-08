@@ -24,6 +24,11 @@ public class PlayerStats
 
     private void Update()
     {
+        
+    }
+
+    public void PlayerUpdate()
+    {
         FindTMPro();
         if (transform.position.y <= -20)
         {
@@ -44,8 +49,6 @@ public class PlayerStats
             Weapon.Shoot();
         }
     }
-
-    
 
     private void Awake()
     {

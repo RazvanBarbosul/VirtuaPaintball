@@ -1,17 +1,18 @@
 using System;
 using UnityEngine;
+using UnityEngine.Networking;
 using TMPro;
 
 namespace UnityStandardAssets._2D
 {
-    public class PlatformerCharacter2D : MonoBehaviour
+    public class PlatformerCharacter2D : NetworkBehaviour
     {
         [SerializeField] private float m_MaxSpeed = 10f;                    // The fastest the player can travel in the x axis.
         [SerializeField] private float m_JumpForce = 400f;                  // Amount of force added when the player jumps.
         [Range(0, 1)] [SerializeField] private float m_CrouchSpeed = .36f;  // Amount of maxSpeed applied to crouching movement. 1 = 100%
         [SerializeField] private bool m_AirControl = false;                 // Whether or not a player can steer while jumping;
         [SerializeField] private LayerMask m_WhatIsGround;                  // A mask determining what is ground to the character
-        [SerializeField] GameObject playerArm;
+        public GameObject playerArm;
 
         private Transform m_GroundCheck;    // A position marking where to check if the player is grounded.
         const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
@@ -20,11 +21,18 @@ namespace UnityStandardAssets._2D
         const float k_CeilingRadius = .01f; // Radius of the overlap circle to determine if the player can stand up
         public Animator m_Anim;            // Reference to the player's animator component.
         public Rigidbody2D m_Rigidbody2D;
+       // [SyncVar (hook = "CmdChangeDirection")]
         private bool m_FacingRight = true;  // For determining which way the player is currently facing.
-        Transform playerGraphics;
+   //     [SyncVar]
+        public Transform playerGraphics;
+        
         private float playerHealth = 100;
         public TextMeshProUGUI healthText;
+        [SyncVar (hook = "CmdChangeDirection")]
         public bool Direction;
+        public GameObject PlayerCharacter;
+        [SyncVar (hook = "CmdTest")]
+        public Vector3 theScale;
 
         private void Awake()
         {
@@ -33,21 +41,34 @@ namespace UnityStandardAssets._2D
             m_CeilingCheck = transform.Find("CeilingCheck");
             m_Anim = GetComponent<Animator>();
             m_Rigidbody2D = GetComponent<Rigidbody2D>();
-            playerGraphics = transform.GetChild(2);
+            playerGraphics = transform.GetChild(3);
             Direction = m_FacingRight;
           //  healthText.text = playerHealth.ToString();
             if (playerGraphics == null)
             {
                 Debug.LogError("PlayerGraphics not found!");
             }
+            theScale = playerGraphics.localScale;
         }
 
         
 
         private void FixedUpdate()
         {
+            if(!isLocalPlayer)
+            {
+                return;
+            }
             m_Grounded = false;
 
+            //if (Direction)
+            //{
+            //    playerGraphics.localScale = new Vector3(1.3f, 1.3f, 1);
+            //}
+            //else
+            //{
+            //    playerGraphics.localScale = new Vector3(-1.3f, 1.3f, 1);
+            //}
             // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
             // This can be done using layers instead but Sample Assets will not overwrite your project settings.
             Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
@@ -60,11 +81,19 @@ namespace UnityStandardAssets._2D
 
             // Set the vertical animation
             m_Anim.SetFloat("vSpeed", m_Rigidbody2D.velocity.y);
+            playerArm.GetComponent<ArmRotation>().Rotate();
+            PlayerCharacter.GetComponent<Player>().PlayerUpdate();
         }
 
 
         public void Move(float move, bool crouch, bool jump)
         {
+            if (!isLocalPlayer)
+            {
+                return;
+            }
+
+           
             // If crouching, check to see if the character can stand up
             if (!crouch && m_Anim.GetBool("Crouch"))
             {
@@ -90,17 +119,19 @@ namespace UnityStandardAssets._2D
                 // Move the character
                 m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed, m_Rigidbody2D.velocity.y);
 
+                Debug.Log("Move: " + move + " facing right: " + m_FacingRight + " direction: " + Direction);
                 // If the input is moving the player right and the player is facing left...
+
                 if (move > 0 && !m_FacingRight)
                 {
                     // ... flip the player.
-                    Flip();
+                    CmdFlip();
                 }
                     // Otherwise if the input is moving the player left and the player is facing right...
                 else if (move < 0 && m_FacingRight)
                 {
                     // ... flip the player.
-                    Flip();
+                    CmdFlip();
                 }
             }
             // If the player should jump...
@@ -113,19 +144,64 @@ namespace UnityStandardAssets._2D
             }
         }
 
+        //   public override void OnStartLocalPlayer()
+        // {
+        // base.OnStartLocalPlayer();
+        //  }
 
-        public void Flip()
+        // [ClientRpc]
+
+        //[Command]
+        public void CmdChangeDirection(bool Directi)
         {
-            // Switch the way the player is labelled as facing.
+            m_FacingRight = Directi;
+            Direction = m_FacingRight;
+            //if (Direction)
+            //{
+            //    playerGraphics.localScale = new Vector3(1.3f, 1.3f, 1);
+            //}
+            //else
+            //{
+            //    playerGraphics.localScale = new Vector3(-1.3f, 1.3f, 1);
+            //}
+            Debug.Log("Direcion changed to " + Direction);
+        }
+
+      // [Command]
+      // [ClientRpc]
+      //[Command]
+        public void CmdTest(Vector3 theScale)
+        {
+           
+            playerGraphics.localScale = theScale;
+            
+            Debug.Log("Scale changed to " + playerGraphics.localScale);
+        }
+
+      
+
+        [Command]
+        public void CmdFlip()
+        {
+            if (!isServer)
+            {
+                return;
+            }
+
             m_FacingRight = !m_FacingRight;
             Direction = m_FacingRight;
+            // Switch the way the player is labelled as facing.
 
-            // Multiply the player's x local scale by -1.
-            Vector3 theScale = playerGraphics.localScale;
-            theScale.x *= -1;
-            playerGraphics.localScale = theScale;
-            //playerArm.transform.localScale = theScale;
+            Vector3 Scale = playerGraphics.localScale;
+            Scale.x *= -1;
+            //playerGraphics.localScale = Scale;
+            theScale = Scale;
+            //CmdTest(theScale);
+     
             
+           // playerGraphics.localScale = theScale;
+
         }
     }
+
 }

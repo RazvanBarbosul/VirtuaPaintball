@@ -30,6 +30,10 @@ public class Parallaxing : MonoBehaviour {
 	
 	// Update is called once per frame
 	void Update () {
+        if (!cam)
+        {
+            cam = Camera.main.transform;
+        }
 		for(int i = 0; i < backgrounds.Length; i++)
         {
             float parallax = (previousCamPos.x - cam.position.x) * parallaxScales[i];

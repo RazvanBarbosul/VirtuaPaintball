@@ -8,7 +8,7 @@ namespace UnityStandardAssets._2D
     public class Platformer2DUserControl : MonoBehaviour
     {
         private PlatformerCharacter2D m_Character;
-        private bool m_Jump;
+        public bool m_Jump;
 
 
         private void Awake()
@@ -29,6 +29,11 @@ namespace UnityStandardAssets._2D
 
         private void FixedUpdate()
         {
+            if (!m_Character.isLocalPlayer)
+            {
+                return;
+            }
+           
             // Read the inputs.
             bool crouch = Input.GetKey(KeyCode.LeftControl);
             float h = CrossPlatformInputManager.GetAxis("Horizontal");
