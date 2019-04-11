@@ -82,7 +82,7 @@ namespace UnityStandardAssets._2D
             // Set the vertical animation
             m_Anim.SetFloat("vSpeed", m_Rigidbody2D.velocity.y);
             playerArm.GetComponent<ArmRotation>().Rotate();
-            PlayerCharacter.GetComponent<Player>().PlayerUpdate();
+            //PlayerCharacter.GetComponent<Player>().PlayerUpdate();
         }
 
 

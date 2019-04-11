@@ -1,9 +1,12 @@
 ﻿using System.Collections;
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UI;
+using UnityEngine.Networking;
 using TMPro;
 
-public class Player : MonoBehaviour {
+public class Player : NetworkBehaviour
+{
     public TextMeshProUGUI healthText;
     public Player player;
     float nextTimeToSearch = 0;
@@ -12,6 +15,15 @@ public class Player : MonoBehaviour {
     private Weapon Weapon;
     private DifficultyManager DifficultyManager;
     public int playerWeaponDamage;
+    [SerializeField]
+    private Image HealthBar;
+    [SerializeField]
+    private Camera PlayerCamera;
+    [SerializeField]
+    Transform firePoint;
+    public GameObject bullet;
+    [SerializeField]
+    UnityStandardAssets._2D.PlatformerCharacter2D PlayerChar;
 
     [System.Serializable]
 public class PlayerStats
@@ -19,12 +31,13 @@ public class PlayerStats
         public int playerHealth = 100;
         
     }
-
+    [SyncVar(hook = "CmdOnChangeHealth")]
+    public float PlayerHP = 100;
     public PlayerStats playerStats = new PlayerStats();
 
     private void Update()
     {
-        
+        PlayerUpdate();
     }
 
     public void PlayerUpdate()
@@ -32,7 +45,7 @@ public class PlayerStats
         FindTMPro();
         if (transform.position.y <= -20)
         {
-            Damage(100);
+            CmdDamage(100);
         }
         healthText.text = player.playerStats.playerHealth.ToString();
 
@@ -40,14 +53,59 @@ public class PlayerStats
         {
             if (Input.GetButtonDown("Fire1"))
             {
-                Weapon.Shoot();
+                //if (!isServer)
+                //{
+                //    return;
+                //}
+                if (!isLocalPlayer)
+                {
+                    return;
+                }
+                //  Weapon.CmdShoot();
+                CmdShoot();
             }
         }
         else if (Input.GetButton("Fire1") && Time.time > Weapon.TimeToFire)
         {
+            //if(!isServer)
+            //{
+            //    return;
+            //}
+            if (!isLocalPlayer)
+            {
+                return;
+            }
+            CmdShoot();
             Weapon.TimeToFire = Time.time + 1 / Weapon.fireRate;
-            Weapon.Shoot();
+            //Weapon.CmdShoot();
+
         }
+    }
+
+    [Command]
+    public void CmdShoot()
+    {
+        Vector2 mousePosition = new Vector2(PlayerCamera.ScreenToWorldPoint(Input.mousePosition).x, PlayerCamera.ScreenToWorldPoint(Input.mousePosition).y);
+        Vector2 firePointPosition = new Vector2(firePoint.position.x, firePoint.position.y);
+
+        GameObject project = Instantiate(bullet, firePointPosition, firePoint.rotation);
+        Rigidbody2D rb = project.GetComponent<Rigidbody2D>();
+
+
+        // rb.AddForce(project.transform.right * 45, ForceMode.VelocityChange);
+        if (PlayerChar.Direction)
+        {
+            rb.velocity = project.transform.right * 30;
+        }
+        else
+        {
+            rb.velocity = project.transform.right * -30;
+        }
+
+        NetworkServer.Spawn(project);
+        //add sound
+
+
     }
 
     private void Awake()
@@ -68,20 +126,34 @@ public class PlayerStats
 
     private void OnTriggerEnter2D(Collider2D other)
     {
-        if (other.tag == "EnemyBullet")
+        if (other.tag == "Bullet")
         {
             Destroy(other.gameObject);
-            Damage(10 * DifficultyManager.SurvivalDifficulty);
+            CmdDamage(10);//* DifficultyManager.SurvivalDifficulty);
         }
     }
 
-    public void Damage(int amount)
+    [Command]
+    public void CmdDamage(int amount)
     {
-        playerStats.playerHealth -= amount;
-        if (playerStats.playerHealth <= 0)
+        if(!isServer)
+        {
+            return;
+        }
+        // playerStats.playerHealth -= amount;
+        PlayerHP -= amount;
+        if (PlayerHP <= 0)
         {
             GameMaster.KillPlayer(this);
         }
+    }
+
+    
+    void CmdOnChangeHealth(float Health)
+    {
+        HealthBar.fillAmount = Health / 100;
+       // healthText.text = PlayerHP.ToString();
+        Debug.Log("Remaining health " + Health);
     }
 
     void FindTMPro()

@@ -2,8 +2,9 @@
 using System.Collections.Generic;
 using UnityEngine.Networking;
 using UnityEngine;
+using UnityEngine.Networking;
 
-public class Weapon : MonoBehaviour
+public class Weapon : NetworkBehaviour
 {
     public float fireRate = 5f;
     public float Damage = 10;
@@ -40,7 +41,7 @@ public class Weapon : MonoBehaviour
       //  }
         //if (fireRate == 0)
         //      {
-        //          if (Input.GetButtonDown("Fire1"))
+        //          if (Input.GetButtonDown("Fire1"))CmdShoot
         //          {
         //              Shoot();
         //          }
@@ -52,7 +53,8 @@ public class Weapon : MonoBehaviour
         //      }
     }
 
-    public void Shoot()
+    [Command]
+    public void CmdShoot()
     {
         Vector2 mousePosition = new Vector2(PlayerCamera.ScreenToWorldPoint(Input.mousePosition).x, PlayerCamera.ScreenToWorldPoint(Input.mousePosition).y);
         Vector2 firePointPosition = new Vector2(firePoint.position.x, firePoint.position.y);
@@ -60,7 +62,7 @@ public class Weapon : MonoBehaviour
         GameObject project = Instantiate(bullet, firePointPosition, firePoint.rotation);
         Rigidbody2D rb = project.GetComponent<Rigidbody2D>();
 
-
+        
         // rb.AddForce(project.transform.right * 45, ForceMode.VelocityChange);
         if (Player.Direction)
         {
@@ -70,7 +72,9 @@ public class Weapon : MonoBehaviour
         {
             rb.velocity = project.transform.right * -30;
         }
-      //add sound
+
+        NetworkServer.Spawn(project);
+        //add sound
 
 
     }
