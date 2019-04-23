@@ -16,6 +16,7 @@ namespace UnityStandardAssets._2D
 
         private Transform m_GroundCheck;    // A position marking where to check if the player is grounded.
         const float k_GroundedRadius = .2f; // Radius of the overlap circle to determine if grounded
+        [SyncVar (hook = "Grounded")]
         public bool m_Grounded;            // Whether or not the player is grounded.
         private Transform m_CeilingCheck;   // A position marking where to check for ceilings
         const float k_CeilingRadius = .01f; // Radius of the overlap circle to determine if the player can stand up
@@ -33,6 +34,12 @@ namespace UnityStandardAssets._2D
         public GameObject PlayerCharacter;
         [SyncVar (hook = "CmdTest")]
         public Vector3 theScale;
+
+        [SyncVar]
+        public bool m_Jump;
+
+        [SyncVar (hook = "VerticalSPeed")]
+        public float VSpeed;
 
         private void Awake()
         {
@@ -59,7 +66,7 @@ namespace UnityStandardAssets._2D
             {
                 return;
             }
-            m_Grounded = false;
+            //  m_Grounded = false;
 
             //if (Direction)
             //{
@@ -71,18 +78,19 @@ namespace UnityStandardAssets._2D
             //}
             // The player is grounded if a circlecast to the groundcheck position hits anything designated as ground
             // This can be done using layers instead but Sample Assets will not overwrite your project settings.
-            Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
-            for (int i = 0; i < colliders.Length; i++)
-            {
-                if (colliders[i].gameObject != gameObject)
-                    m_Grounded = true;
-            }
-            m_Anim.SetBool("Ground", m_Grounded);
+            //Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
+            //for (int i = 0; i < colliders.Length; i++)
+            //{
+            //    if (colliders[i].gameObject != gameObject)
+            //        m_Grounded = true;
+            //}
+            //m_Anim.SetBool("Ground", m_Grounded);
 
             // Set the vertical animation
-            m_Anim.SetFloat("vSpeed", m_Rigidbody2D.velocity.y);
+            //m_Anim.SetFloat("vSpeed", VSpeed);
             playerArm.GetComponent<ArmRotation>().Rotate();
             //PlayerCharacter.GetComponent<Player>().PlayerUpdate();
+            CmdGrounded();
         }
 
 
@@ -92,8 +100,8 @@ namespace UnityStandardAssets._2D
             {
                 return;
             }
+            
 
-           
             // If crouching, check to see if the character can stand up
             if (!crouch && m_Anim.GetBool("Crouch"))
             {
@@ -114,12 +122,13 @@ namespace UnityStandardAssets._2D
                 move = (crouch ? move*m_CrouchSpeed : move);
 
                 // The Speed animator parameter is set to the absolute value of the horizontal input.
-                m_Anim.SetFloat("Speed", Mathf.Abs(move));
-
+                CmdChangeSpeed(move);
+                m_Anim.SetFloat("Speed", Mathf.Abs(VSpeed));
+                Debug.Log("Anim speed set to: " + VSpeed);
                 // Move the character
                 m_Rigidbody2D.velocity = new Vector2(move*m_MaxSpeed, m_Rigidbody2D.velocity.y);
 
-                Debug.Log("Move: " + move + " facing right: " + m_FacingRight + " direction: " + Direction);
+               // Debug.Log("Move: " + move + " facing right: " + m_FacingRight + " direction: " + Direction);
                 // If the input is moving the player right and the player is facing left...
 
                 if (move > 0 && !m_FacingRight)
@@ -150,7 +159,36 @@ namespace UnityStandardAssets._2D
         //  }
 
         // [ClientRpc]
+        void Jump(bool Jmp)
+        {
+            if (!m_Jump)
+            {
+                // Read the jump input in Update so button presses aren't missed.
+              //  m_Jump = CrossPlatformInputManager.GetButtonDown("Jump");
+            }
+        }
 
+        [Command]
+        void CmdChangeSpeed(float Sp)
+        {
+            if (!isServer)
+            {
+                return;
+            }
+            if(Sp < 0)
+            {
+                Sp *= -1;
+            }
+            VSpeed = Sp;
+           // m_Anim.SetFloat("vSpeed", VSpeed);
+            Debug.Log("New speed= " + VSpeed);
+        }
+
+        void VerticalSPeed(float Speed)
+        {
+            VSpeed = Speed;
+            m_Anim.SetFloat("Speed", VSpeed);
+        }
         //[Command]
         public void CmdChangeDirection(bool Directi)
         {
@@ -164,9 +202,26 @@ namespace UnityStandardAssets._2D
             //{
             //    playerGraphics.localScale = new Vector3(-1.3f, 1.3f, 1);
             //}
-            Debug.Log("Direcion changed to " + Direction);
+            //Debug.Log("Direcion changed to " + Direction);
         }
 
+        [Command]
+        public void CmdGrounded()
+        {
+            if (!isServer)
+            {
+                return;
+            }
+            m_Grounded = false;
+            Collider2D[] colliders = Physics2D.OverlapCircleAll(m_GroundCheck.position, k_GroundedRadius, m_WhatIsGround);
+            for (int i = 0; i < colliders.Length; i++)
+            {
+                if (colliders[i].gameObject != gameObject)
+                    m_Grounded = true;
+            }
+            Debug.Log("Is rounded? " + m_Grounded);
+            m_Anim.SetBool("Ground", m_Grounded);
+        }
       // [Command]
       // [ClientRpc]
       //[Command]
@@ -178,6 +233,11 @@ namespace UnityStandardAssets._2D
             Debug.Log("Scale changed to " + playerGraphics.localScale);
         }
 
+        public void Grounded(bool Ground)
+        {
+            m_Grounded = Ground;
+            m_Anim.SetBool("Ground", Ground);
+        }
       
 
         [Command]

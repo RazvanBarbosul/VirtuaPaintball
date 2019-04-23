@@ -559,6 +559,8 @@ MonoBehaviour:
   Direction: 1
   PlayerCharacter: {fileID: 1727582314000948}
   theScale: {x: 0, y: 0, z: 0}
+  m_Jump: 0
+  VSpeed: 0
 --- !u!114 &114156016943598794
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -670,7 +672,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   m_Target: {fileID: 4595768741791000}
   m_ChildIndex: 1
-  m_SendInterval: 0.1
+  m_SendInterval: 0.11111111
   m_SyncRotationAxis: 7
   m_RotationSyncCompression: 0
   m_MovementThreshold: 0.001
