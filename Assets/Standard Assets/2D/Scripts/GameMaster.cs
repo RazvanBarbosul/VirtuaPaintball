@@ -20,7 +20,7 @@ public class GameMaster : MonoBehaviour {
         PlayerScore.text = ScoreValue.ToString();
     }
 
-    public Transform playerPrefab;
+    public GameObject playerPrefab;
     public GameObject enemyPrefab;
     public Transform spawnPoint;
     public int spawnDelay = 2;

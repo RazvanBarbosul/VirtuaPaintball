@@ -50,7 +50,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1021583985447848}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalPosition: {x: -163.1, y: 39.7, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children:
   - {fileID: 4870488996705466}
@@ -64,7 +64,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1939313225070268}
   m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
-  m_LocalPosition: {x: -2.24, y: 2.24, z: 0}
+  m_LocalPosition: {x: 0.4, y: 31.2, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_Children: []
   m_Father: {fileID: 4280270716634368}
@@ -99,7 +99,7 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   DifficultyLevel: 0
   PlayerScore: {fileID: 0}
-  playerPrefab: {fileID: 4775750336121602, guid: b77dc5b2b19323144acb37e8a1e6eb77,
+  playerPrefab: {fileID: 1727582314000948, guid: b77dc5b2b19323144acb37e8a1e6eb77,
     type: 2}
   enemyPrefab: {fileID: 1284241626313512, guid: 37b202305254dae40b34a8f79d8d6ca8,
     type: 2}

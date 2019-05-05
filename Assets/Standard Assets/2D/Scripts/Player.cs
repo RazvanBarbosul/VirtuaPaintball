@@ -24,6 +24,8 @@ public class Player : NetworkBehaviour
     public GameObject bullet;
     [SerializeField]
     UnityStandardAssets._2D.PlatformerCharacter2D PlayerChar;
+    [SerializeField]
+    public GameMaster GM;
 
     [System.Serializable]
 public class PlayerStats
@@ -38,6 +40,7 @@ public class PlayerStats
     private void Update()
     {
         PlayerUpdate();
+        Debug.Log("Player velocity: " + player.GetComponent<Rigidbody2D>().velocity);
     }
 
     public void PlayerUpdate()
@@ -119,7 +122,7 @@ public class PlayerStats
         {
             player = GameObject.FindGameObjectWithTag("Player").GetComponent<Player>();
         }
-
+        GM = FindObjectOfType<GameMaster>();
         DifficultyManager = FindObjectOfType<DifficultyManager>();
         playerWeaponDamage = 10 * (6 - DifficultyManager.SurvivalDifficulty);
     }
@@ -144,11 +147,25 @@ public class PlayerStats
         PlayerHP -= amount;
         if (PlayerHP <= 0)
         {
-            GameMaster.KillPlayer(this);
+            PlayerHP = 0;
+            RpcRespawn();
+           // GameMaster.KillPlayer(this);
         }
     }
 
-    
+    [ClientRpc]
+    void RpcRespawn()
+    {
+        if(isLocalPlayer)
+        {
+            //TODO: Add more spawn points and choose a random
+
+            transform.position = GM.spawnPoint.position;
+            PlayerHP = 100;
+        }
+    }
+
+
     void CmdOnChangeHealth(float Health)
     {
         HealthBar.fillAmount = Health / 100;
