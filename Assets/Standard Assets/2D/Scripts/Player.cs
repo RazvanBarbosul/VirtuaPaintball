@@ -26,6 +26,10 @@ public class Player : NetworkBehaviour
     UnityStandardAssets._2D.PlatformerCharacter2D PlayerChar;
     [SerializeField]
     public GameMaster GM;
+    public Camera myCam;
+    public NetworkPlayer owner;
+
+    public UnityStandardAssets._2D.Camera2DFollow CameraScript;
 
     [System.Serializable]
 public class PlayerStats
@@ -40,6 +44,27 @@ public class PlayerStats
     private void Update()
     {
         PlayerUpdate();
+        //if (isLocalPlayer)
+        //{
+        //    if(CameraScript.target == null)
+        //    {
+        //        CameraScript.FindPlayer(this.gameObject);
+
+        //    }
+        //}
+
+        if (owner != null && Network.player == owner && isLocalPlayer)
+        {
+            //Only the client that owns this object executes this code
+            if (myCam.enabled == false)
+                myCam.enabled = true;
+            if (CameraScript.target == null)
+           {
+               CameraScript.FindPlayer(this.gameObject);
+
+                   }
+        }
+
         Debug.Log("Player velocity: " + player.GetComponent<Rigidbody2D>().velocity);
     }
 
@@ -114,6 +139,7 @@ public class PlayerStats
     private void Awake()
     {
        // healthText.text = playerStats.playerHealth.ToString();
+       
     }
 
     private void Start()
@@ -125,6 +151,7 @@ public class PlayerStats
         GM = FindObjectOfType<GameMaster>();
         DifficultyManager = FindObjectOfType<DifficultyManager>();
         playerWeaponDamage = 10 * (6 - DifficultyManager.SurvivalDifficulty);
+        owner = Network.player;
     }
 
     private void OnTriggerEnter2D(Collider2D other)

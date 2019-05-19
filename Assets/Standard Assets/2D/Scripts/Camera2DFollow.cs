@@ -1,4 +1,5 @@
 using System;
+using UnityEngine.Networking;
 using UnityEngine;
 
 namespace UnityStandardAssets._2D
@@ -17,6 +18,7 @@ namespace UnityStandardAssets._2D
         private Vector3 m_LastTargetPosition;
         private Vector3 m_CurrentVelocity;
         private Vector3 m_LookAheadPos;
+        public Player Player;
 
         // Use this for initialization
         private void Start()
@@ -32,7 +34,7 @@ namespace UnityStandardAssets._2D
         {
             if (target == null)
             {
-                FindPlayer();
+               // FindPlayer();
                 return;
             }
             // only update lookahead pos if accelerating or changed direction
@@ -59,12 +61,13 @@ namespace UnityStandardAssets._2D
             m_LastTargetPosition = target.position;
         }
 
-        void FindPlayer()
+        public void FindPlayer(GameObject Player)
         {
             if (nextTimeToSearch <= Time.time)
             {
-                GameObject searchResult = GameObject.FindGameObjectWithTag("Player");
-                if(searchResult != null)
+                //GameObject searchResult = GameObject.FindGameObjectWithTag("Player");
+                GameObject searchResult = Player;
+                if(searchResult != null )
                 {
                     target = searchResult.transform;
                     Debug.Log("Found");
