@@ -34,7 +34,7 @@ namespace UnityStandardAssets._2D
         {
             if (target == null)
             {
-               // FindPlayer();
+                FindPlayer(FindObjectOfType<SurvivalPlayer>().gameObject);
                 return;
             }
             // only update lookahead pos if accelerating or changed direction
@@ -75,5 +75,7 @@ namespace UnityStandardAssets._2D
                 }
             }
         }
+
+       
     }
 }
