@@ -653,13 +653,13 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 5d8238cc53530b64fbb7828c3d3bb591, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  target: {fileID: 0}
+  target: {fileID: 4775750336121602}
   damping: 0.3
   lookAheadFactor: 1.5
   lookAheadReturnSpeed: 0.5
   lookAheadMoveThreshold: 0.1
   yPosRestriction: -1
-  Player: {fileID: 0}
+  Player: {fileID: 114990244268368904}
 --- !u!114 &114703861804877444
 MonoBehaviour:
   m_ObjectHideFlags: 1
@@ -812,6 +812,7 @@ MonoBehaviour:
   PlayerChar: {fileID: 114106105924212750}
   GM: {fileID: 0}
   myCam: {fileID: 20885949371880324}
+  playerScore: 0
   CameraScript: {fileID: 114437662750935198}
   PlayerHP: 100
   playerStats:

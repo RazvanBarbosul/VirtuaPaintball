@@ -77,7 +77,7 @@ public class PlayerStats
         {
             CmdDamage(100, this.gameObject);
         }
-        healthText.text = player.playerStats.playerHealth.ToString();
+        //healthText.text = player.playerStats.playerHealth.ToString();
 
         if (Weapon.fireRate == 0)
         {
