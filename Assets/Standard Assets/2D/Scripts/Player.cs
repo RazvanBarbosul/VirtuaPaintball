@@ -28,6 +28,8 @@ public class Player : NetworkBehaviour
     public GameMaster GM;
     public Camera myCam;
     public NetworkPlayer owner;
+    [SerializeField]
+    int playerScore = 0;
 
     public UnityStandardAssets._2D.Camera2DFollow CameraScript;
 
@@ -65,7 +67,7 @@ public class PlayerStats
                    }
         }
 
-        Debug.Log("Player velocity: " + player.GetComponent<Rigidbody2D>().velocity);
+       // Debug.Log("Player velocity: " + player.GetComponent<Rigidbody2D>().velocity);
     }
 
     public void PlayerUpdate()
@@ -73,7 +75,7 @@ public class PlayerStats
         FindTMPro();
         if (transform.position.y <= -20)
         {
-            CmdDamage(100);
+            CmdDamage(100, this.gameObject);
         }
         healthText.text = player.playerStats.playerHealth.ToString();
 
@@ -130,6 +132,7 @@ public class PlayerStats
             rb.velocity = project.transform.right * -30;
         }
 
+        project.GetComponent<Bullet>().player = this;
         NetworkServer.Spawn(project);
         //add sound
 
@@ -159,12 +162,12 @@ public class PlayerStats
         if (other.tag == "Bullet")
         {
             Destroy(other.gameObject);
-            CmdDamage(10);//* DifficultyManager.SurvivalDifficulty);
+            CmdDamage(10, other.gameObject);//* DifficultyManager.SurvivalDifficulty);
         }
     }
 
     [Command]
-    public void CmdDamage(int amount)
+    public void CmdDamage(int amount, GameObject proj)
     {
         if(!isServer)
         {
@@ -175,6 +178,12 @@ public class PlayerStats
         if (PlayerHP <= 0)
         {
             PlayerHP = 0;
+            if(proj)
+            {
+                proj.GetComponent<Bullet>().player.playerScore++;
+                Debug.LogError("Player " + player.name + " score: " + proj.GetComponent<Bullet>().player.playerScore);
+            }
+            PlayerHP = 100;
             RpcRespawn();
            // GameMaster.KillPlayer(this);
         }
@@ -197,7 +206,7 @@ public class PlayerStats
     {
         HealthBar.fillAmount = Health / 100;
        // healthText.text = PlayerHP.ToString();
-        Debug.Log("Remaining health " + Health);
+        //Debug.Log("Remaining health " + Health);
     }
 
     void FindTMPro()

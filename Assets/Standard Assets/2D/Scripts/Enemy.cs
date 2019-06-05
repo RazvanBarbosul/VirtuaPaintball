@@ -4,18 +4,18 @@ using UnityEngine;
 using UnityEngine.UI;
 
 public class Enemy : MonoBehaviour {
-    public Player Player;
+    public SurvivalPlayer Player;
     public int JumpForce;
    
     [SerializeField]
     private float MaxSpeed = 10f;
 
     [SerializeField]
-    private UnityStandardAssets._2D.PlatformerCharacter2D Controller;
+    private UnityStandardAssets._2D.SurvivalPlatformerCharacter2D Controller;
     
     public bool Direction;
     [SerializeField]
-    private Weapon Weapon;
+    private SurvivalWeapon Weapon;
     [SerializeField]
     private Image HealthBar;
     
@@ -27,9 +27,10 @@ public class Enemy : MonoBehaviour {
     private DifficultyManager DifficultyManager;
     // Use this for initialization
     void Start () {
+
 		if(Player == null)
         {
-            Player = FindObjectOfType<Player>();
+            Player = FindObjectOfType<SurvivalPlayer>();
         }
         Controller.m_Anim.SetFloat("Speed", 0.2f);
         if (Player.transform.position.x > gameObject.transform.position.x)
@@ -39,7 +40,7 @@ public class Enemy : MonoBehaviour {
         else
         {
             Direction = false;
-            Controller.CmdFlip();
+            Controller.Flip();
         }
         EnemyStartHealth = 100;
         EnemyCurrentHealth = EnemyStartHealth;
@@ -131,7 +132,7 @@ public class Enemy : MonoBehaviour {
         }
         else
         {
-            Player = FindObjectOfType<Player>();
+            Player = FindObjectOfType<SurvivalPlayer>();
           
             
         }
@@ -162,14 +163,14 @@ public class Enemy : MonoBehaviour {
         if (Player.transform.position.x > gameObject.transform.position.x && !Direction && Player!= null)
         {
             // ... flip the player.
-            Controller.CmdFlip();
+            Controller.Flip();
             Direction = !Direction;
         }
         // Otherwise if the input is moving the player left and the player is facing right...
         else if (Player.transform.position.x < gameObject.transform.position.x && Direction && Player !=null)
         {
             // ... flip the player.
-            Controller.CmdFlip();
+            Controller.Flip();
             Direction = !Direction;
         }
 

@@ -36,6 +36,12 @@ public class GameMaster : MonoBehaviour {
         gm.StartCoroutine(gm.RespawnPlayer());
     }
 
+    public static void KillPlayer(SurvivalPlayer player)
+    {
+        Destroy(player.gameObject);
+        gm.StartCoroutine(gm.RespawnPlayer());
+    }
+
     public void SpawnEnemy(Vector3 position, Quaternion rotation)
     {
         Instantiate(enemyPrefab, position, rotation);

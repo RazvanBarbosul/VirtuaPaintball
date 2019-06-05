@@ -25,7 +25,7 @@ public class SpikeBall : MonoBehaviour {
 
     public IEnumerator DamagePlayer(Player Player)
     {
-        Player.CmdDamage(70);
+        Player.CmdDamage(200, Player.gameObject);
         yield return new WaitForSeconds(3);
     }
 }
