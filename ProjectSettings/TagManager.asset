@@ -14,6 +14,7 @@ TagManager:
   - Ceiling
   - EnemyBullet
   - Terrain
+  - PlayerScore
   layers:
   - Default
   - TransparentFX

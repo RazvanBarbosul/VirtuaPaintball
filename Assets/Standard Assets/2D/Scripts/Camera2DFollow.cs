@@ -15,10 +15,12 @@ namespace UnityStandardAssets._2D
         float nextTimeToSearch = 0;
 
         private float m_OffsetZ;
+        
         private Vector3 m_LastTargetPosition;
         private Vector3 m_CurrentVelocity;
         private Vector3 m_LookAheadPos;
         public Player Player;
+        private GameObject ObjToFind;
 
         // Use this for initialization
         private void Start()
@@ -34,8 +36,30 @@ namespace UnityStandardAssets._2D
         {
             if (target == null)
             {
-                FindPlayer(FindObjectOfType<SurvivalPlayer>().gameObject);
-                return;
+                
+
+                try
+                {
+                    ObjToFind = FindObjectOfType<SurvivalPlayer>().gameObject;
+                }
+                catch (Exception e)
+                {
+                    Debug.Log(e);
+                }
+               
+                if(ObjToFind)
+                {
+                    FindPlayer(ObjToFind);
+                }
+                else
+                {
+                    ObjToFind = FindObjectOfType<Player>().gameObject;
+                    if(ObjToFind)
+                    {
+                        FindPlayer(ObjToFind);
+                    }
+                }
+               // return;
             }
             // only update lookahead pos if accelerating or changed direction
             float xMoveDelta = (target.position - m_LastTargetPosition).x;

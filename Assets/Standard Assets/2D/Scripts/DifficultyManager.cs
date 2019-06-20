@@ -8,6 +8,8 @@ public class DifficultyManager : MonoBehaviour
     public int SurvivalDifficulty;
 
     public static DifficultyManager Instance;
+
+    public string PlayerName;
     // Use this for initialization
     void Start()
     {
@@ -18,6 +20,11 @@ public class DifficultyManager : MonoBehaviour
     void Update()
     {
 
+    }
+
+    public void SetPlayerName(string newName)
+    {
+        PlayerName = newName;
     }
 
     void Awake()

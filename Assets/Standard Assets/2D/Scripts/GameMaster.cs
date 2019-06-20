@@ -17,18 +17,25 @@ public class GameMaster : MonoBehaviour {
             gm = GameObject.FindGameObjectWithTag("GM").GetComponent<GameMaster>();
         }
         ScoreValue = 0;
-        PlayerScore.text = ScoreValue.ToString();
+        //GameObject p = GameObject.FindGameObjectWithTag("Player").gameObject;
+        //if(p == null)
+        //{
+        //    return;
+        //}
+        //PlayerScore.text = ScoreValue.ToString();
     }
 
     public GameObject playerPrefab;
     public GameObject enemyPrefab;
-    public Transform spawnPoint;
+    public Transform[] spawnPoint;
     public int spawnDelay = 2;
 
     public IEnumerator RespawnPlayer()
     {
         yield return new WaitForSeconds(spawnDelay);
-        Instantiate(playerPrefab, spawnPoint.position, spawnPoint.rotation);
+        Instantiate(playerPrefab, spawnPoint[0].position, spawnPoint[0].rotation);
+        gm.ScoreValue = 0;
+        
     }
     public static void KillPlayer(Player player)
     {

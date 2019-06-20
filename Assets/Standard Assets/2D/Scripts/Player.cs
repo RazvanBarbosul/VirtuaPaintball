@@ -8,12 +8,15 @@ using TMPro;
 public class Player : NetworkBehaviour
 {
     public TextMeshProUGUI healthText;
+    public TextMeshProUGUI scoreText;
+    public TextMeshProUGUI endGameText;
     public Player player;
     float nextTimeToSearch = 0;
     public Transform EnemyAimLocation;
     [SerializeField]
     private Weapon Weapon;
     private DifficultyManager DifficultyManager;
+    public NetworkManager NetworkManager;
     public int playerWeaponDamage;
     [SerializeField]
     private Image HealthBar;
@@ -28,8 +31,9 @@ public class Player : NetworkBehaviour
     public GameMaster GM;
     public Camera myCam;
     public NetworkPlayer owner;
-    [SerializeField]
-    int playerScore = 0;
+    [SyncVar(hook = "CmdOnScoreChanged")]
+    public int playerScore = 0;
+    public string PlayerName;
 
     public UnityStandardAssets._2D.Camera2DFollow CameraScript;
 
@@ -54,21 +58,25 @@ public class PlayerStats
 
         //    }
         //}
-
+      //  scoreText.SetText(playerScore.ToString());
         if (owner != null && Network.player == owner && isLocalPlayer)
         {
             //Only the client that owns this object executes this code
             if (myCam.enabled == false)
                 myCam.enabled = true;
             if (CameraScript.target == null)
-           {
+            {
                CameraScript.FindPlayer(this.gameObject);
+            }
 
-                   }
+            if (scoreText.enabled == false)
+                scoreText.enabled = true;
+           
         }
 
        // Debug.Log("Player velocity: " + player.GetComponent<Rigidbody2D>().velocity);
     }
+
 
     public void PlayerUpdate()
     {
@@ -122,7 +130,6 @@ public class PlayerStats
         Rigidbody2D rb = project.GetComponent<Rigidbody2D>();
 
 
-        // rb.AddForce(project.transform.right * 45, ForceMode.VelocityChange);
         if (PlayerChar.Direction)
         {
             rb.velocity = project.transform.right * 30;
@@ -134,9 +141,6 @@ public class PlayerStats
 
         project.GetComponent<Bullet>().player = this;
         NetworkServer.Spawn(project);
-        //add sound
-
-
     }
 
     private void Awake()
@@ -153,16 +157,29 @@ public class PlayerStats
         }
         GM = FindObjectOfType<GameMaster>();
         DifficultyManager = FindObjectOfType<DifficultyManager>();
-        playerWeaponDamage = 10 * (6 - DifficultyManager.SurvivalDifficulty);
+        NetworkManager = FindObjectOfType<NetworkManager>();
+        playerWeaponDamage = 10;// * (6 - DifficultyManager.SurvivalDifficulty);
         owner = Network.player;
+        scoreText.enabled = false;
+        int ran = (int)Random.Range(0, 999);
+        PlayerName = "Player" + ran.ToString();
+        // PlayerNameText.SetText(PlayerName);
+
+        RpcRespawn();
+        Debug.Log(PlayerName);
     }
 
     private void OnTriggerEnter2D(Collider2D other)
     {
         if (other.tag == "Bullet")
         {
-            Destroy(other.gameObject);
+           
+            if(PlayerHP - 10 <= 0)
+            {
+                CmdChangeScore(1, other.gameObject);
+            }
             CmdDamage(10, other.gameObject);//* DifficultyManager.SurvivalDifficulty);
+            Destroy(other.gameObject);
         }
     }
 
@@ -173,20 +190,37 @@ public class PlayerStats
         {
             return;
         }
-        // playerStats.playerHealth -= amount;
         PlayerHP -= amount;
         if (PlayerHP <= 0)
         {
             PlayerHP = 0;
             if(proj)
             {
-                proj.GetComponent<Bullet>().player.playerScore++;
-                Debug.LogError("Player " + player.name + " score: " + proj.GetComponent<Bullet>().player.playerScore);
+               // proj.GetComponent<Bullet>().player.playerScore++;
+               // proj.GetComponent<Bullet>().player.playerScore++;
+              //  proj.GetComponent<Bullet>().player.CmdChangeScore(1);
+                //proj.GetComponent<Bullet>().player.scoreText.SetText(proj.GetComponent<Bullet>().player.playerScore.ToString());
             }
             PlayerHP = 100;
             RpcRespawn();
-           // GameMaster.KillPlayer(this);
         }
+    }
+
+    [Command]
+    void CmdChangeScore(int newScore, GameObject Player)
+    {
+        if(!isServer)
+        {
+            return;
+        }
+        Player.GetComponent<Bullet>().player.playerScore++;
+        if(Player.GetComponent<Bullet>().player.playerScore == 1)
+        {
+            //RpcEndGame();
+            // CmdStartOver();
+           // CallEnd();
+        }
+        Player.GetComponent<Bullet>().player.scoreText.SetText(Player.GetComponent<Bullet>().player.playerScore.ToString());
     }
 
     [ClientRpc]
@@ -194,19 +228,74 @@ public class PlayerStats
     {
         if(isLocalPlayer)
         {
-            //TODO: Add more spawn points and choose a random
-
-            transform.position = GM.spawnPoint.position;
+            int ran = (int)Random.Range(0, GM.spawnPoint.Length);
+            transform.position = GM.spawnPoint[ran].position;
             PlayerHP = 100;
         }
     }
 
+    void CallEnd()
+    {
+        CmdStartOver();
+    }
+
+    [ClientRpc]
+    void RpcEndGame()
+    {
+        if (isLocalPlayer)
+        {
+            endGameText.enabled = true;
+            if (playerScore == 1)
+            {
+                endGameText.SetText("Victory!");
+            }
+            else
+            {
+                endGameText.SetText("Defeat!");
+            }
+            Debug.LogError("ENDGAME");
+            StartCoroutine(RestartGame());
+           // playerScore = 0;
+          //  endGameText.enabled = false;
+           // RpcRespawn();
+        }
+        
+    }
+
+    [Command]
+    void CmdStartOver()
+    {
+        if (!isServer)
+        {
+            return;
+        }
+        // RpcRespawn();
+        RpcEndGame();
+        
+    }
+
+    public IEnumerator RestartGame()
+    {
+        yield return new WaitForSeconds(10);
+
+        playerScore = 0;
+        endGameText.enabled = false;
+        RpcRespawn();
+       // CmdStartOver();
+    }
 
     void CmdOnChangeHealth(float Health)
     {
         HealthBar.fillAmount = Health / 100;
-       // healthText.text = PlayerHP.ToString();
-        //Debug.Log("Remaining health " + Health);
+    }
+
+    void CmdOnScoreChanged(int score)
+    {
+        scoreText.SetText(score.ToString());
+      if(score == 1)
+        {
+            CallEnd();
+        }
     }
 
     void FindTMPro()
@@ -219,7 +308,7 @@ public class PlayerStats
 
             if (searchResult != null)
             {
-                healthText = searchResult;
+              //  healthText = searchResult;
                // healthText.text = playerStats.playerHealth.ToString();
                 nextTimeToSearch = Time.time + 0.5f;
                 //Debug.Log("GG!");
