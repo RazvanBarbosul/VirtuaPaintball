@@ -34,6 +34,8 @@ public class Player : NetworkBehaviour
     [SyncVar(hook = "CmdOnScoreChanged")]
     public int playerScore = 0;
     public string PlayerName;
+    public HealthPickup healthPickup;
+    public Rigidbody2D m_Rigidbody2D;
 
     public UnityStandardAssets._2D.Camera2DFollow CameraScript;
 
@@ -143,6 +145,20 @@ public class PlayerStats
         NetworkServer.Spawn(project);
     }
 
+    [Command]
+    public void CmdSpawnHealthPickup()
+    {
+        int ran = (int)Random.Range(0, 1);
+        if(ran == 0)
+        {
+            GameObject Pickup = Instantiate(healthPickup.gameObject, player.transform.position, player.transform.rotation);
+            NetworkServer.Spawn(Pickup);
+            Destroy(Pickup, 10);
+        }
+    }
+
+
+
     private void Awake()
     {
        // healthText.text = playerStats.playerHealth.ToString();
@@ -158,12 +174,11 @@ public class PlayerStats
         GM = FindObjectOfType<GameMaster>();
         DifficultyManager = FindObjectOfType<DifficultyManager>();
         NetworkManager = FindObjectOfType<NetworkManager>();
-        playerWeaponDamage = 10;// * (6 - DifficultyManager.SurvivalDifficulty);
+        playerWeaponDamage = 10;
         owner = Network.player;
         scoreText.enabled = false;
         int ran = (int)Random.Range(0, 999);
         PlayerName = "Player" + ran.ToString();
-        // PlayerNameText.SetText(PlayerName);
 
         RpcRespawn();
         Debug.Log(PlayerName);
@@ -178,8 +193,22 @@ public class PlayerStats
             {
                 CmdChangeScore(1, other.gameObject);
             }
-            CmdDamage(10, other.gameObject);//* DifficultyManager.SurvivalDifficulty);
+            CmdDamage(10, other.gameObject);            Destroy(other.gameObject);
+        }
+
+        if (other.tag == "HealthPickup")
+        {
+            CmdDamage(-25, other.gameObject);
             Destroy(other.gameObject);
+        }
+        if(other.tag == "Trampolie")
+        {
+            Debug.LogError("Should jump");
+           m_Rigidbody2D.AddForce(new Vector2(0f, 3500));
+        }
+        if(other.tag == "SpikeBall")
+        {
+            CmdChangeScore(-1, other.gameObject);
         }
     }
 
@@ -193,16 +222,12 @@ public class PlayerStats
         PlayerHP -= amount;
         if (PlayerHP <= 0)
         {
-            PlayerHP = 0;
-            if(proj)
-            {
-               // proj.GetComponent<Bullet>().player.playerScore++;
-               // proj.GetComponent<Bullet>().player.playerScore++;
-              //  proj.GetComponent<Bullet>().player.CmdChangeScore(1);
-                //proj.GetComponent<Bullet>().player.scoreText.SetText(proj.GetComponent<Bullet>().player.playerScore.ToString());
-            }
             PlayerHP = 100;
             RpcRespawn();
+        }
+        if(PlayerHP > 100)
+        {
+            PlayerHP = 100;
         }
     }
 
@@ -213,13 +238,15 @@ public class PlayerStats
         {
             return;
         }
-        Player.GetComponent<Bullet>().player.playerScore++;
-        if(Player.GetComponent<Bullet>().player.playerScore == 1)
+        if (Player.GetComponent<Bullet>())
         {
-            //RpcEndGame();
-            // CmdStartOver();
-           // CallEnd();
+            Player.GetComponent<Bullet>().player.playerScore += newScore;
         }
+        else
+        {
+            this.playerScore += newScore;
+        }
+
         Player.GetComponent<Bullet>().player.scoreText.SetText(Player.GetComponent<Bullet>().player.playerScore.ToString());
     }
 
@@ -228,24 +255,25 @@ public class PlayerStats
     {
         if(isLocalPlayer)
         {
+            CmdSpawnHealthPickup();
             int ran = (int)Random.Range(0, GM.spawnPoint.Length);
             transform.position = GM.spawnPoint[ran].position;
             PlayerHP = 100;
         }
     }
 
-    void CallEnd()
+    void CallEnd(GameObject winner)
     {
-        CmdStartOver();
+        CmdStartOver(winner);
     }
 
     [ClientRpc]
-    void RpcEndGame()
+    void RpcEndGame(GameObject winner)
     {
         if (isLocalPlayer)
         {
             endGameText.enabled = true;
-            if (playerScore == 1)
+            if (this.gameObject == winner)
             {
                 endGameText.SetText("Victory!");
             }
@@ -253,24 +281,19 @@ public class PlayerStats
             {
                 endGameText.SetText("Defeat!");
             }
-            Debug.LogError("ENDGAME");
             StartCoroutine(RestartGame());
-           // playerScore = 0;
-          //  endGameText.enabled = false;
-           // RpcRespawn();
         }
         
     }
 
     [Command]
-    void CmdStartOver()
+    void CmdStartOver(GameObject winner)
     {
         if (!isServer)
         {
             return;
         }
-        // RpcRespawn();
-        RpcEndGame();
+        RpcEndGame(winner);
         
     }
 
@@ -281,7 +304,6 @@ public class PlayerStats
         playerScore = 0;
         endGameText.enabled = false;
         RpcRespawn();
-       // CmdStartOver();
     }
 
     void CmdOnChangeHealth(float Health)
@@ -292,9 +314,9 @@ public class PlayerStats
     void CmdOnScoreChanged(int score)
     {
         scoreText.SetText(score.ToString());
-      if(score == 1)
+      if(score == 5)
         {
-            CallEnd();
+            CallEnd(this.gameObject);
         }
     }
 
@@ -302,16 +324,12 @@ public class PlayerStats
     {
         if (nextTimeToSearch <= Time.time)
         {
-            TextMeshProUGUI searchResult = TextMeshProUGUI.FindObjectOfType<TextMeshProUGUI>(); //GameObject.FindGameObjectWithTag("TMPro");
-
-
+            TextMeshProUGUI searchResult = TextMeshProUGUI.FindObjectOfType<TextMeshProUGUI>();
 
             if (searchResult != null)
             {
-              //  healthText = searchResult;
-               // healthText.text = playerStats.playerHealth.ToString();
+              ;
                 nextTimeToSearch = Time.time + 0.5f;
-                //Debug.Log("GG!");
             }
         }
     }

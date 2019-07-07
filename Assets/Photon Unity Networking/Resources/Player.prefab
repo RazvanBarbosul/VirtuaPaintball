@@ -348,7 +348,7 @@ Transform:
   m_PrefabInternal: {fileID: 100100000}
   m_GameObject: {fileID: 1727582314000948}
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: -148.10242, y: 216.81096, z: 0}
+  m_LocalPosition: {x: 28.736551, y: 4.6389093, z: 0}
   m_LocalScale: {x: 0.8, y: 0.8, z: 1}
   m_Children:
   - {fileID: 4867764007592416}
@@ -1133,6 +1133,9 @@ MonoBehaviour:
   myCam: {fileID: 20885949371880324}
   playerScore: 0
   PlayerName: 
+  healthPickup: {fileID: 114564030308081302, guid: 6761e46244d228e4aa6ed157c7258c87,
+    type: 2}
+  m_Rigidbody2D: {fileID: 50314884164403662}
   CameraScript: {fileID: 114437662750935198}
   PlayerHP: 100
   playerStats:

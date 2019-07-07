@@ -15,6 +15,9 @@ TagManager:
   - EnemyBullet
   - Terrain
   - PlayerScore
+  - HealthPickup
+  - Trampolie
+  - SpikeBall
   layers:
   - Default
   - TransparentFX
